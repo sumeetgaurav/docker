@@ -1,19 +1,19 @@
-1.yum install docker -y # command to install docker in Reg Hat Family Machine
-2.docker --version # command to verify which docker version installed
-3.service docker start ---# Command to start the docker service
-4.docker images ---# Command to check all the Docker Images
-5.docker ps # Command to check all the running containers
-6.docker ps -a # Command to verify all running and Stopped Containers
-7.docker run -it ubuntu /bin/bash # Command to create and start a container. you will inside the container
-8.docker search ubuntu # Search Docker Hub for Docker images related to "ubuntu"
-9.docker pull ubuntu/apache2 -  # Downloads the ubuntu/apache2 Docker image from a Docker registry, Docker Hub to your local machine.
-10.docker rename currentcontainername newcontainername # Command to rename an existing Docker container where 
-11.docker run -it --name mycontainer ubuntu /bin/bash # creates a new Ubuntu container named mycontainer and opens an interactive Bash terminal inside it.
-12.docker start <container_name_or_container_id> # Command to start an existing stopped Docker container
-13.docker attach <container_name_or_container_id> # Command to connect your current terminal to the main process of a running Docker container
-14.docker stop <container_name_or_container_id> command is used to gracefully stop a running Docker container.
-15.docker rm <container_name_or_container_id>  # Command to delete a Docker container from your machine,not the Docker image.
-16.docker rmi <image_name_or_image_id> # Command to delete a Docker image from your machine
-17.docker commit <container_name_or_id> <new_image_name>   #creates a new Docker image from the  existing container
-18.docker run --name gauravcontainer -it sgimage /bin/bash # creates and starts a new Docker container named gauravcontainer from the sgimage image and opens an interactive Bash shell.
+yum install docker -y # command to install docker in Reg Hat Family Machine
+docker --version # command to verify which docker version installed
+service docker start ---# Command to start the docker service
+docker images ---# Command to check all the Docker Images
+docker ps # Command to check all the running containers
+docker ps -a # Command to verify all running and Stopped Containers
+docker run -it ubuntu /bin/bash # Command to create and start a container. you will inside the container
+docker search ubuntu # Search Docker Hub for Docker images related to "ubuntu"
+docker pull ubuntu/apache2 -  # Downloads the ubuntu/apache2 Docker image from a Docker registry, Docker Hub to your local machine.
+docker rename currentcontainername newcontainername # Command to rename an existing Docker container where 
+docker run -it --name mycontainer ubuntu /bin/bash # creates a new Ubuntu container named mycontainer and opens an interactive Bash terminal inside it.
+docker start <container_name_or_container_id> # Command to start an existing stopped Docker container
+docker attach <container_name_or_container_id> # Command to connect your current terminal to the main process of a running Docker container
+docker stop <container_name_or_container_id> command is used to gracefully stop a running Docker container.
+docker rm <container_name_or_container_id>  # Command to delete a Docker container from your machine,not the Docker image.
+docker rmi <image_name_or_image_id> # Command to delete a Docker image from your machine
+docker commit <container_name_or_id> <new_image_name>   #creates a new Docker image from the  existing container
+docker run --name gauravcontainer -it sgimage /bin/bash # creates and starts a new Docker container named gauravcontainer from the sgimage image and opens an interactive Bash shell.
 
