@@ -1,0 +1,218 @@
+Three Ways of creating Docker Image:
+-------------------------------------------
+Pull Image from Docker Hub
+Create Image from existing Docker Containers
+Create from DockerFile 
+
+
+Dockerfile- It is file which is used to create Docker Images which is having an Instruction in the form of Key & Value Pairs
+
+Dockerfile-1
+-------------
+
+FROM ubuntu
+RUN apt update
+RUN apt install tree -y
+RUN echo "This is a DockerFile" >  /tmp/Dockerfile
+
+
+docker build -t <image_name> . # Command to build a Docker image from a Dockerfile
+                               # docker: Invokes the Docker CLI, build:Tells Docker to create (build) an image from a Dockerfil                                                                  # -t: Stands for tag.It assigns a name (and optionally a version) to the image.
+                               # <image_name>: The name (tag) given to the Docker image.
+			       # . : Docker looks for the Dockerfile in this directory where it is kept in this case it is root directory
+
+
+Dockerfile-2
+------------
+
+FROM ubuntu
+WORKDIR /tmp                                    # Sets the current working directory to /tmp/Dockerfile
+RUN echo "Welcome to Devops" > tmp/sumeetfile   # Create a sumeetfile and write text into it
+ENV myname Sumeet                               # creates an environment variable inside the Docker image/container, myname → Variable name,Sumeet → Variable value.
+COPY linuxfile  /etc                            # Copy instruction copies the file or directories from your local  machine (build context) into the Docker Image. The linuxfile should be in the same location where Dockerfile is there
+ADD devops.tar.gz /home                         # ADD instruction can do everything that COPY does plus Automatically extracts devops.tar archives & Can download  files from URL.
+ADD https://example.com/file.txt /tmp           # ADD Instruction tells Docker to download a file from the specified URL during the image build and place it inside the image at the /tmp directory
+
+
+
+Command for creating an Image from the above Dockerfile: docker build -t myimage .
+Command for creating a Container from the above Image: docker run --name mycontainer -it myimage  /bin/bash
+
+
+Instead of using Dockerfile to create an Image. Can we use Dockerfile as different name ?
+Ans: Yes
+
+vi Sumeetfile
+===========================================================
+FROM ubuntu
+RUN apt update -y
+RUN apt install tree -y
+RUN apt install git -y
+RUN echo "Welcome to New Docker File" > /tmp/Dockerfile 
+===========================================================
+
+
+
+
+docker build -t newimage . -f Sumeetfile # Command to build a Docker image using a specific Dockerfile.
+                                         # docker build : Starts the process of building a Docker image.
+										 # -t : assigns the name (tag) NewImage to the image being created. (-t stands for tag.)
+										 # .  : Specifies the build context, which is the current directory
+										 # -f Sumeetfile : Tells Docker to use a file named Sumeetfile instead of the default Dockerfile.
+
+
+
+Docker Volume:
+---------------
+
+Docker Volume is a directory inside the container. That directory we have to declare as a Volume
+With Docker Volume we can share the data accross Containers
+
+Advantages:
+1. Volume Directory can be shared with the another container
+2. They acts as a Hard Link(Synchronous Replication)
+
+Hard Link - Let's assume we have two container i.e Container A and Container B. 
+When Volume Directory of Container A is  shared with Container B. Then Volume Directory are on sync and visa-versa
+Whatever update happen on Container A will same reflect on Container Bash
+
+
+There are two types of Volume Sharing:
+--------------------------------------
+1. Conatiner to Conatiner Sharing
+2. Host to Conatiner Sharing.
+
+
+Practical Implementation:
+---------------------------
+
+Create a Dockerfile
+vi Dockerfile
+===========================
+FROM ubuntu       # Uses the Ubuntu Docker image as the base image.
+Volume ["data"]   # It tells Docker that the /data directory should be treated as a persistent storage location
+
+docker build -t volumeimage .                                # Command to build a Docker image from the Dockerfile in the current directory.
+docker run -it --name volumecontainer volumeimage /bin/bash  # Creates and starts a new Docker container named volumecontainer from the volumeimage and opens an interactive Bash shell. 
+
+To verify: Put some data into the data volume directory
+Exit from the container
+
+Now, Share volumecontainer to other container i.e othervolumecontainer
+
+docker run -it --name othervolumecontainer --volumes-from volumecontainer ubuntu /bin/bash  # Command to create a new Docker container that shares the volumes of an existing container (volumecontainer).
+
+
+Now you are inside othervolumecontainer: create a file in Volume data directory. Exit from the Container
+Verify other volumecontainer - You can see both the volume container directory are sync
+
+docker start volumecontainer   # Command to start an existing stopped container named volumecontainer or <container_id>
+docker attach volumecontainer  # Comamnd to attach your terminal to a running container named volumecontainer.
+
+Go to cd /data
+ls
+
+Verify the content which is created in other volume directory container.
+This proves that both the container volume directory are on sync
+
+While creating the container declare the directory as volume
+
+docker run -it --name container1 -v /dirA ubuntu /bin/bash  # Command to declare the directory as volume while creating the container1
+
+To share the data of container1 with other container create container2
+
+docker run -it --name container2 --volumes-from container1 ubuntu /bin/bash
+verify by running the command ls you can see dirA
+
+We can create a volume in two ways:
+-----------------------------------
+1. From Dockerfile where we can give Instruction 
+2. While Creating the Container we can declare directory as Volume
+
+
+
+Host to Container Volume Mapping:
+------------------------------------
+
+docker run -it --name container6 -v /root:/sumeetfile ubuntu /bin/bash  # docker run: Creates and starts a new container from an image.
+                                                                        # -it: interactive + Allocates a terminal so you can interact with the container.
+																        # --name container5 : Assign a name to the container
+																        # -v /root:/fileA : Creates volume mount.It maps the host directory /root to the directory /sumeetfile inside the container. [Note: First keep sumeetfile dir in the host]
+                                                                        # ubuntu: The Docker image used to create the container.
+																        # /bin/bash: Starts the Bash shell inside the container.
+																		
+
+Port Mapping/Port Expose:
+----------------------------
+
+Container don't have Public IP addresses. They have ports.
+EC2 machine have IP addresses. What we will do we will take one port from EC2 and one port from Container and map both of them and open the port
+By using Base Machine(EC2) IP addresses. The request will go to Base Machine(EC2) through port because we have mapped.
+With the help of Base Machine Port we are exposing the Container Port to the outside world. That's why it is called port mapping
+We do this because Container don't have any IP addresses.
+
+docker run -td --name webcont1 -p 8081:80 ubuntu /bin/bash   # -td: Runs the container in detached mode, meaning it runs in the background
+                                                             # --name webcont1: Assigns the name webcont1 to the container.
+												             # -p 8081:80: Maps port 8081 on the host machine to port 80 inside the container. Traffic sent to
+												                http://<host-ip>:8081 is forwarded to port 80 in the container.
+													 
+docker exec -it webcont1 /bin/bash                           # It is used to open a Bash shell inside an already running Docker container.
+                                                             # docker exec: Executes a command inside an existing, running container.
+															 # webcont1: The name (or ID) of the running container.
+															 # /bin/bash: Starts the Bash shell inside the container.
+
+Run the below command inside the container															
+-------------------------------------------
+apt update
+apt install apache2 -y
+cd /var/www/html
+echo "Google-1" > index.html
+service apache2 start
+-------------------------------------------
+
+
+
+Volume Mapping + Port Mapping
+------------------------------
+vi Dockerfile:
+--------------------------------------------
+FROM ubuntu
+RUN apt update -y
+RUN apt install apache2 -y
+CMD ["apache2ctl", "-D", "FOREGROUND"]
+
+--------------------------------------------
+
+docker build -t devopsimg .
+docker run -td --name devopscontainer -v /root:/var/www/html -p 8083:80 devopsimg
+chmod  -R 777 /root
+
+
+Docker Hub:
+-------------
+
+How to share the Images with my friend
+
+Upload in Docker Hub , From there you pull the image and create the Container
+
+docker login
+Username of DockerHub
+Password
+From Commandline I have logged into DockerHub
+
+In order to push we have keep reserved space. Give the name of the reserved space                                                                 
+docker tag sampleimg sumeetgaurav/newsampleimg          # docker → Docker CLI
+                                                        # tag → Creates a new tag (alias) for an existing image
+														# sampleimg → The source image that already exists on your system.
+Then Push                                               # newsampleimg → The new repository name (and optional namespace) for the image.
+docker push sumeetgaurav/newsampleimg
+
+Go to Dockerhub and Repository
+
+reference image will be kept in base machine as well
+docker images
+
+Now the image is uploaded and someone has to pull. Follow the below steps:
+
+docker pull sumeetgaurav/newsampleimg
+
